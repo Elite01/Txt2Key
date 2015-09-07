@@ -1,17 +1,13 @@
-package Txt2Key;
-
-import java.awt.*; 
+import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
 import javax.swing.UIManager.LookAndFeelInfo;
-
 import net.miginfocom.swing.MigLayout;
 
 public class Txt2Key {
 
-	private static final double version = 1.0;
-	
+	private static final String VERSION = "1.0.1";
+
 	private JFrame frmTxt2Key;
 	private String txt;
 	private Robot robot;
@@ -21,6 +17,7 @@ public class Txt2Key {
 	private JSpinner spinnerBeteenLetters;
 	private JSpinner spinnerBeteenTimes;
 
+	private JScrollPane scrollPane;
 	private JTextArea txtarea;
 	private JProgressBar progressBar;
 
@@ -84,7 +81,7 @@ public class Txt2Key {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frmTxt2Key = new JFrame("Txt2Key " + version);
+		frmTxt2Key = new JFrame("Txt2Key " + VERSION);
 		frmTxt2Key.setSize(300, 500);
 		frmTxt2Key.setMinimumSize(new Dimension(300, 500));
 		frmTxt2Key.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -185,18 +182,13 @@ public class Txt2Key {
 		spinnerSeconds.setEnabled(false);
 
 		comboBox = new JComboBox<String>();
-		frmTxt2Key.getContentPane().add(comboBox, "cell 2 3,grow");
 		comboBox.setEnabled(false);
-		comboBox.addItem("Seconds");
-		comboBox.addItem("Minutes");
-		comboBox.addItem("Hours");
-		comboBox.addItem("Days");
-		comboBox.addItem("Weeks");
-		comboBox.addItem("Months");
-		comboBox.addItem("Years");
-		comboBox.addItem("Decades");
-		comboBox.addItem("Centuries");
-
+		String[]items={	"Seconds", "Minutes", "Hours",
+						"Days", "Weeks", "Months",
+						"Years", "Decades", "Centuries"};
+		for (String item:items)
+			comboBox.addItem(item);
+		frmTxt2Key.getContentPane().add(comboBox, "cell 2 3,grow");
 		frmTxt2Key.getContentPane().add(new JLabel(" to type text."), "cell 3 3,grow");
 
 		cbBetweenLetters = new JCheckBox();
@@ -222,17 +214,15 @@ public class Txt2Key {
 			}
 		});
 
-		spinnerBeteenTimes = new JSpinner();
+		spinnerBeteenTimes = new JSpinner(new SpinnerNumberModel(0, 0, null, 1));
 		frmTxt2Key.getContentPane().add(spinnerBeteenTimes, "cell 1 5,grow");
 		spinnerBeteenTimes.setEnabled(false);
-		spinnerBeteenTimes.setModel(new SpinnerNumberModel(0, 0, null, 1));
 
 		frmTxt2Key.getContentPane().add(new JLabel("Miliseconds between times."), "cell 2 5 2 1,grow");
 
-		JScrollPane scrollPane = new JScrollPane();
-		pane.add(scrollPane, "cell 0 6 4 1,grow");
-
 		txtarea = new JTextArea();
+		scrollPane = new JScrollPane(txtarea);
+		pane.add(scrollPane, "cell 0 6 4 1,grow");
 		txtarea.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent arg0) {
@@ -262,7 +252,6 @@ public class Txt2Key {
 		});
 		txtarea.setDragEnabled(true);
 		txtarea.setFont(new Font("Arial", Font.PLAIN, 12));
-		scrollPane.setViewportView(txtarea);
 
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
@@ -326,11 +315,7 @@ public class Txt2Key {
 		lblTimes.setText("0");
 		lblTimes.setHorizontalAlignment(SwingConstants.CENTER);
 		menuBar.add(lblTimes);
-		chckbxAlwaysOnTop.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				frmTxt2Key.setAlwaysOnTop(chckbxAlwaysOnTop.isSelected());
-			}
-		});
+
 	}
 
 	public int keyevent(char c)
@@ -418,7 +403,7 @@ public class Txt2Key {
 					case "Centuries":	seconds*=1*60*60*24*7*4*12*10*10;		break;
 					case "Millenia":	seconds*=1*60*60*24*7*4*12*10*10*10;	break;
 					}
-					
+
 					for (long stop=System.currentTimeMillis()+seconds*1000; stop > System.currentTimeMillis() && !boolStop;)
 					{
 						TypeText(true, stop, seconds);
@@ -447,15 +432,27 @@ public class Txt2Key {
 			{
 				while(boolPause && !boolStop) // loop until unpause or stop
 					Thread.sleep(1000); // check every second
-				
+
 				char c=txt.charAt(b);
 				if (c>='A' && c<='Z' || c=='%' || c==':')//uppercase=needs shift (or %)
 					robot.keyPress(KeyEvent.VK_SHIFT);
 				if (c>='a' && c<='z')//lowercase=not good - change to uppercase
 					c-=32;
 
-				robot.keyPress  (keyevent(c));
-				robot.keyRelease(keyevent(c));
+				int key=0; // temp to hold keyevent
+				try
+				{
+					key=keyevent(c);
+					robot.keyPress  (key);
+					robot.keyRelease(key);
+				}
+				catch(IllegalArgumentException e)
+				{
+					System.err.println(key + " doesnt exist");
+					robot.keyPress  (KeyEvent.VK_SPACE);
+					robot.keyRelease(KeyEvent.VK_SPACE); // space instead
+					e.printStackTrace();
+				}
 
 				robot.keyRelease(KeyEvent.VK_SHIFT); // if shifted
 
@@ -464,7 +461,7 @@ public class Txt2Key {
 
 				if (!isTimerBool) // to handle progressbar mid-txt
 				{
-					lblTimes.setText(progressbarParamA+1+"");
+					lblTimes.setText(""+(int)progressbarParamA+1);
 					if 	(progressbarParamB!=0)	// times!=0
 						progressBar.setValue((int) ((b*100/txt.length()/progressbarParamB)+(progressbarParamA*100/progressbarParamB)));
 				}
