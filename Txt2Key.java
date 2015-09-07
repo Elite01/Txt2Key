@@ -6,7 +6,7 @@ import net.miginfocom.swing.MigLayout;
 
 public class Txt2Key {
 
-	private static final String VERSION = "1.0.1";
+	private static final String VERSION = "1.0.2";
 
 	private JFrame frmTxt2Key;
 	private String txt;
@@ -470,6 +470,9 @@ public class Txt2Key {
 					double secondspassed=progressbarParamB-((double)progressbarParamA-System.currentTimeMillis())/1000;
 					lblTimes.setText((secondspassed/3600<10 ? "0":"") + (int)secondspassed/3600 + ":" + (secondspassed/60<10 ? "0":"") + (int)secondspassed/60 + ":" + (secondspassed<10 ? "0":"") + (int)secondspassed);
 					progressBar.setValue((int) (secondspassed*100/progressbarParamB));
+					
+					if (progressBar.getValue()==100) // in case txt is longer than time (100%)
+						return;
 				}
 			}
 		}
