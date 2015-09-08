@@ -308,6 +308,11 @@ public class Txt2Key {
 		}
 
 		chckbxAlwaysOnTop = new JCheckBox("Always On Top");
+		chckbxAlwaysOnTop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				frmTxt2Key.setAlwaysOnTop(chckbxAlwaysOnTop.isSelected());
+			}
+		});
 		menuBar.add(chckbxAlwaysOnTop);
 
 		menuBar.add(new JLabel("  |  "));
@@ -392,16 +397,16 @@ public class Txt2Key {
 					long seconds=(int)spinnerSeconds.getValue();
 					switch (comboBox.getSelectedItem().toString())
 					{
-					case "Seconds":		seconds*=1;		break;
-					case "Minutes":		seconds*=1*60;	break;
-					case "Hours":		seconds*=1*60*60;	  break;
-					case "Days":		seconds*=1*60*60*24;  break;
-					case "Weeks":		seconds*=1*60*60*24*7;		break;
-					case "Months":		seconds*=1*60*60*24*7*4;	break;
-					case "Years":		seconds*=1*60*60*24*7*4*12;		  break;
-					case "Decades":		seconds*=1*60*60*24*7*4*12*10;	  break;
-					case "Centuries":	seconds*=1*60*60*24*7*4*12*10*10;		break;
-					case "Millenia":	seconds*=1*60*60*24*7*4*12*10*10*10;	break;
+						case "Seconds":		seconds*=1;		break;
+						case "Minutes":		seconds*=1*60;	break;
+						case "Hours":		seconds*=1*60*60;	  break;
+						case "Days":		seconds*=1*60*60*24;  break;
+						case "Weeks":		seconds*=1*60*60*24*7;		break;
+						case "Months":		seconds*=1*60*60*24*7*4;	break;
+						case "Years":		seconds*=1*60*60*24*7*4*12;		  break;
+						case "Decades":		seconds*=1*60*60*24*7*4*12*10;	  break;
+						case "Centuries":	seconds*=1*60*60*24*7*4*12*10*10;		break;
+						case "Millenia":	seconds*=1*60*60*24*7*4*12*10*10*10;	break;
 					}
 
 					for (long stop=System.currentTimeMillis()+seconds*1000; stop > System.currentTimeMillis() && !boolStop;)
